@@ -38,3 +38,10 @@ To evaluate our customers, we need a `customer_ranking.csv` containing the follo
 * `firstname` customer first name
 * `lastname` customer last name
 * `total_euros` total euros this customer has spent on products
+
+
+# What I do
+
+I decided to write this code using Python because I have to improve my knowledge of this programming language.
+
+
