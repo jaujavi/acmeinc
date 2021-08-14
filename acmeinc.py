@@ -44,9 +44,9 @@ def get_order_price(order, file_products):
 
 def create_order_prices(file_orders, file_products, file_order_prices, file_order_prices_header):
     try:
+        print_csv_header(file_order_prices, file_order_prices_header)
         with open(file_orders, 'r') as file_r:
             file_orders_csv = csv.DictReader(file_r) #default delimiter is ","
-            print_csv_header(file_order_prices, file_order_prices_header)
             for order in file_orders_csv:
                 print('Products for order:',order['id'],' ->',order['products'])
                 #order_price = get_order_price(order, file_products)
@@ -57,17 +57,47 @@ def create_order_prices(file_orders, file_products, file_order_prices, file_orde
         print('ERROR: File not found.')
 
 
+def get_product_customers(product_id, file_orders):
+    order_id_list = []
+    with open(file_orders, 'r') as file_r:
+        file_orders_csv = csv.DictReader(file_r) #default delimiter is ","
+        for order in file_orders_csv:
+            if product_id in order['products']:
+                order_id_list.append(order['id'])
+    return order_id_list
+
+
+def create_products_customers(file_orders, file_products, file_products_customers, file_products_customers_header):
+    try:
+        print_csv_header(file_products_customers, file_products_customers_header)
+        with open(file_products, 'r') as file_r:
+            file_products_csv = csv.DictReader(file_r) #default delimiter is ","
+            for product in file_products_csv:
+                print('Checking orders for product:',product['id'])
+                customers_ids = get_product_customers(product['id'], file_orders)
+                customers_ids_spaced = ' '.join(customers_ids)
+                print('Customers that buy the product id:',product['id'],'->',customers_ids_spaced)
+                product_customers_row = (product['id'], customers_ids_spaced)
+                print_csv_row(file_products_customers, product_customers_row)
+    except IOError:
+        print('ERROR: File not found.')
+
+
 def main():
 
     file_customers = "customers.csv"
     file_products = "products.csv"
     file_orders = "orders.csv"
 
+    #task1
     file_order_prices = "order_prices.csv"
     file_order_prices_header = ['id', 'euros']
-
-    #task1
     create_order_prices(file_orders, file_products, file_order_prices, file_order_prices_header)
+
+    #task2
+    file_products_customers = "product_customers.csv"
+    file_products_customers_header = ['id', 'customer_ids']
+    create_products_customers(file_orders, file_products, file_products_customers, file_products_customers_header)
 
 
 if __name__ == "__main__":
