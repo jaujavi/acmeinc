@@ -1,4 +1,5 @@
 import csv
+import pandas
 
 
 def print_csv_header(file_name,header):
@@ -58,13 +59,16 @@ def create_order_prices(file_orders, file_products, file_order_prices, file_orde
 
 
 def get_product_customers(product_id, file_orders):
-    order_id_list = []
-    with open(file_orders, 'r') as file_r:
-        file_orders_csv = csv.DictReader(file_r) #default delimiter is ","
-        for order in file_orders_csv:
-            if product_id in order['products']:
-                order_id_list.append(order['id'])
-    return order_id_list
+    try:
+        order_id_list = []
+        with open(file_orders, 'r') as file_r:
+            file_orders_csv = csv.DictReader(file_r) #default delimiter is ","
+            for order in file_orders_csv:
+                if product_id in order['products']:
+                    order_id_list.append(order['id'])
+        return order_id_list
+    except Exception as e:
+        print('ERROR:',e)
 
 
 def create_products_customers(file_orders, file_products, file_products_customers, file_products_customers_header):
@@ -83,8 +87,42 @@ def create_products_customers(file_orders, file_products, file_products_customer
         print('ERROR: File not found.')
 
 
+def get_customer_total_euros(customer_id, file_orders, file_products):
+    try:
+        total = 0
+        with open(file_orders, 'r') as file_r:
+            file_orders_csv = csv.DictReader(file_r) #default delimiter is ","
+            for order in file_orders_csv:
+                if customer_id in order['customer']:
+                    total += get_order_price(order, file_products)
+        return float(total)
+    except Exception as e:
+        print('ERROR:',e)
+
+
+def order_file_desc(file_name, value):
+    df = pandas.read_csv(file_name)
+    sorted_df = df.sort_values(by=[value], ascending=False)
+    sorted_df.to_csv(file_name, index=False)
+
+
+def create_customer_ranking(file_orders, file_products, file_customers, file_customer_ranking, file_customer_ranking_header):
+    try:
+        print_csv_header(file_customer_ranking, file_customer_ranking_header)
+        with open(file_customers, 'r') as file_r:
+            file_customers_csv = csv.DictReader(file_r) #default delimiter is ","
+            for customer in file_customers_csv:
+                total_euros = get_customer_total_euros(customer['id'],file_orders, file_products)
+                customer_ranking_row = (customer['id'], customer['firstname'], customer['lastname'], total_euros)
+                print_csv_row(file_customer_ranking, customer_ranking_row)
+                order_file_desc(file_customer_ranking, file_customer_ranking_header[3])
+    except IOError:
+        print('ERROR: File not found.')
+
+
 def main():
 
+    #source files
     file_customers = "customers.csv"
     file_products = "products.csv"
     file_orders = "orders.csv"
@@ -99,6 +137,10 @@ def main():
     file_products_customers_header = ['id', 'customer_ids']
     create_products_customers(file_orders, file_products, file_products_customers, file_products_customers_header)
 
+    #task3
+    file_customer_ranking = "customer_ranking.csv"
+    file_customer_ranking_header = ['id', 'firstname', 'lastname', 'total_euros']
+    create_customer_ranking(file_orders, file_products, file_customers, file_customer_ranking, file_customer_ranking_header)
 
 if __name__ == "__main__":
     main()
