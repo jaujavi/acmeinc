@@ -1,47 +1,60 @@
 import csv
 
+
+def print_csv_header(file_name,header):
+    try:
+        with open(file_name, 'w', newline='') as file_w:
+            file_csv_w = csv.DictWriter(file_w, fieldnames=header)
+            file_csv_w.writeheader()
+    except Exception as e:
+        print('ERROR:',e)
+
+
+def print_csv_row(file_name,row):
+    try:
+        with open(file_name, 'a+', newline='') as file_a:
+            #file_csv_a = csv.DictWriter(file_a, fieldnames=header)
+            file_csv_a = csv.writer(file_a) #default delimiter is ","
+            file_csv_a.writerow(row)
+    except Exception as e:
+        print('ERROR:',e)
+
+
 def get_product_price(product_id, file_products):
     try:
-        #print('\tSearching for product',product_id,'in file',file_products)
-
         with open(file_products, 'r') as file:
-            file_csv = csv.DictReader(file) #default delimiter is ","
-
-            for product in file_csv:
-
-                #print('\tIs the product',product_id,'same as',product["id"],'??')
-                if product_id == str(product["id"]):
-
-                    #print('\tPRICE FOUND! Product:',str(product["id"]),'Price:',product["cost"])
-                    return float(product["cost"])
-                #else:
-                    #print('\tPRICE NOT FOUND! Product:',product["id"])
-
-    except IOError:
-        print('ERROR: File', file_products,'not found.')
+            file_products_csv = csv.DictReader(file) #default delimiter is ","
+            for product in file_products_csv:
+                if product_id == str(product['id']):
+                    return float(product['cost'])
+    except Exception as e:
+        print('ERROR:',e)
 
 
-def order_prices(file_name, file_products):
+def get_order_price(order, file_products):
+    total = 0
+    products = order['products'].split()
+    for product_id in products:
+        #product_price = get_product_price(product_id, file_products)
+        #print("\tproduct:", product_id,'\tprice:',product_price)
+        total += get_product_price(product_id, file_products)
+    print('Total_order_price ->', total,'\n')
+    return float(total)
+
+
+def create_order_prices(file_orders, file_products, file_order_prices, file_order_prices_header):
     try:
-        with open(file_name, 'r') as file:
-            file_csv = csv.DictReader(file) #default delimiter is ","
-
-            for order in file_csv:
-                print('products ->',order["products"])
-                #print('products ->',order["products"].split())
-
-                total_order_price = 0
-                products = order["products"].split()
-
-                for product_id in products:
-                    product_price = get_product_price(product_id, file_products)
-                    print("\tproduct:", product_id,'\tprice:',product_price)
-                    #total_order_price += get_product_price(product, file_products)
-                    total_order_price += product_price
-                print('order id -> ',order["id"],'\n\ttotal_order_price ->', total_order_price)
-
+        with open(file_orders, 'r') as file_r:
+            file_orders_csv = csv.DictReader(file_r) #default delimiter is ","
+            print_csv_header(file_order_prices, file_order_prices_header)
+            for order in file_orders_csv:
+                print('Products for order:',order['id'],' ->',order['products'])
+                #order_price = get_order_price(order, file_products)
+                #order_price = {'id': order["id"], 'euros': total_order_price}
+                order_price_row = (order['id'], get_order_price(order, file_products))
+                print_csv_row(file_order_prices, order_price_row)
     except IOError:
-        print('ERROR: File', file_name,'not found.')
+        print('ERROR: File not found.')
 
 
 def main():
@@ -50,8 +63,11 @@ def main():
     file_products = "products.csv"
     file_orders = "orders.csv"
 
+    file_order_prices = "order_prices.csv"
+    file_order_prices_header = ['id', 'euros']
+
     #task1
-    order_prices(file_orders, file_products)
+    create_order_prices(file_orders, file_products, file_order_prices, file_order_prices_header)
 
 
 if __name__ == "__main__":
