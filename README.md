@@ -42,6 +42,21 @@ To evaluate our customers, we need a `customer_ranking.csv` containing the follo
 
 # What I do
 
-I decided to write this code using Python because I have to improve my knowledge of this programming language.
+I decided to write this code using Python because I want to improve my knowledge of this programming language.
 
+First of all I needed to learn about how to manage csv files, lists, arrays, and strings an that language.
 
+Then I wrote a logic structure and finally put all togehter and start coding.
+
+There are three mainly types of funcions that use csv class:
+· print_*   -> print rows on a file.
+· get_*     -> get info from a file.
+· create_*  -> create files with new rows obtained from the gets functions.
+
+There are another function tha use pandas class to order the csv file on task 3.
+
+So finally I wrote the three tasks to make it working :)
+
+## Future improvements
+
+In a real world, this scenary would be improved storing all data using RDBMS and then use SQL languaje to be easer, faster and scalable.
